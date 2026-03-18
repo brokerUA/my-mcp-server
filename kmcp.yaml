@@ -1,0 +1,23 @@
+name: my-mcp-server
+framework: mcp-go
+version: 0.1.0
+description: demo mcp server
+author: Dmytro Andrieiev
+email: 435026+brokerua@users.noreply.github.com
+secrets:
+    local:
+        enabled: false
+        provider: env
+        file: .env.local
+    production:
+        enabled: false
+        provider: kubernetes
+        secretName: my-mcp-server-secrets-production
+        namespace: default
+    staging:
+        enabled: false
+        provider: kubernetes
+        secretName: my-mcp-server-secrets-staging
+        namespace: default
+created_at: 2026-03-18T23:40:49.760051+02:00
+updated_at: 2026-03-18T23:40:49.939329+02:00
