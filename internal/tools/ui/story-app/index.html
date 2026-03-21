@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Generator</title>
+    <style>
+        /*
+           We use standard CSS variables from the MCP Apps specification.
+           Be sure to specify fallbacks (e.g., #ffffff) so that the interface
+           looks normal even if the host does not pass its styles.
+        */
+        :root {
+            background-color: var(--mcp-theme-color-background, #ffffff);
+            color: var(--mcp-theme-color-text, #333333);
+            font-family: var(--mcp-theme-typography-fontFamily, system-ui, -apple-system, sans-serif);
+            font-size: var(--mcp-theme-typography-fontSize, 16px);
+        }
+
+        body {
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        h2 { margin-top: 0; }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        input, select {
+            padding: 8px;
+            border: 1px solid var(--mcp-theme-color-border, #cccccc);
+            border-radius: var(--mcp-theme-radius-medium, 6px);
+            background-color: var(--mcp-theme-color-surface, #f9f9f9);
+            color: inherit;
+            font-family: inherit;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: var(--mcp-theme-color-primary, #007bff);
+            color: #ffffff; /* Text on primary button is usually white */
+            border: none;
+            border-radius: var(--mcp-theme-radius-medium, 6px);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        button:hover { opacity: 0.9; }
+
+        #status { font-size: 0.85em; opacity: 0.7; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<h2>Smart Story Generator 📝</h2>
+<p>Configure parameters, and I will compose the perfect prompt for the AI.</p>
+
+<div class="form-group">
+    <label for="genre">Genre:</label>
+    <select id="genre">
+        <option value="Cyberpunk">Cyberpunk</option>
+        <option value="Dark Fantasy">Dark Fantasy</option>
+        <option value="Space Detective">Space Detective</option>
+        <option value="Romantic Comedy">Romantic Comedy</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="hero">Hero's name and profession:</label>
+    <input type="text" id="hero" placeholder="E.g.: Alex, tired hacker" value="Alex, tired hacker">
+</div>
+
+<div class="form-group">
+    <label for="tone">Story atmosphere:</label>
+    <select id="tone">
+        <option value="Dark and tense">Dark and tense</option>
+        <option value="Funny and absurd">Funny and absurd</option>
+        <option value="Philosophical and calm">Philosophical and calm</option>
+    </select>
+</div>
+
+<button id="generateBtn">Send prompt to chat</button>
+<div id="status">Initializing interface...</div>
+
+<script>
+  let reqId = 1;
+  const statusEl = document.getElementById('status');
+  const generateBtn = document.getElementById('generateBtn');
+
+  // 1. Start handshake on load
+  window.onload = () => {
+    window.parent.postMessage({
+      jsonrpc: '2.0',
+      id: reqId++,
+      method: 'ui/initialize',
+      params: {
+        appCapabilities: { availableDisplayModes: ['inline'] }
+      }
+    }, '*');
+  };
+
+  // Handle messages from host
+  window.addEventListener('message', (event) => {
+    const msg = event.data;
+
+    // If we received a response to ui/initialize
+    if (msg.jsonrpc === '2.0' && msg.id === 1) {
+
+      // 2. Apply CSS variables (Theming) from host context
+      const hostContext = msg.result?.hostContext;
+      if (hostContext && hostContext.styles && hostContext.styles.variables) {
+        const vars = hostContext.styles.variables;
+        for (const [key, value] of Object.entries(vars)) {
+          // Ensure key starts with '--'
+          const cssVar = key.startsWith('--') ? key : `--${key}`;
+          document.documentElement.style.setProperty(cssVar, value);
+        }
+      }
+
+      // 3. Notify host that initialization is complete
+      window.parent.postMessage({
+        jsonrpc: '2.0',
+        method: 'ui/notifications/initialized',
+        params: {}
+      }, '*');
+
+      statusEl.innerText = "Ready!";
+    }
+  });
+
+  // 4. Generate and send prompt
+  generateBtn.addEventListener('click', () => {
+    const genre = document.getElementById('genre').value;
+    const hero = document.getElementById('hero').value;
+    const tone = document.getElementById('tone').value;
+
+    // Form a high-quality prompt
+    const finalPrompt = `Act as a professional writer. Write an exciting short story (about 2-3 paragraphs) in the "${genre}" genre. \n\nMain character: ${hero}. \nStory atmosphere: ${tone}. \n\nMake a surprise ending!`;
+
+    // Send to chat on behalf of the user
+    window.parent.postMessage({
+      jsonrpc: '2.0',
+      id: reqId++,
+      method: 'ui/message',
+      params: {
+        role: 'user',
+        content: [
+          { type: "text", text: finalPrompt }
+        ]
+      }
+    }, '*');
+
+    statusEl.innerText = "Prompt successfully sent!";
+  });
+</script>
+</body>
+</html>
