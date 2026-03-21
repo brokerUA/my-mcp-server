@@ -15,8 +15,8 @@
 go.work
 go.work.sum
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# Dependency directories
+vendor/
 
 # Go extra files
 my-mcp-server
@@ -32,7 +32,8 @@ docker-compose.yml
 .vscode/
 
 # Intellij
-.idea/ 
+.idea/
+.junie/
 
 # MCP Inspector config
 mcp-server-config.json

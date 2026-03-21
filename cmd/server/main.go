@@ -26,11 +26,17 @@ func main() {
 }
 
 func run() error {
-	// Create the MCP server
-	server := mcp.NewServer(&mcp.Implementation{Name: "my-mcp-server", Version: "0.1.0"}, nil)
+	impl := &mcp.Implementation {
+	  Name: "my-mcp-server",
+	  Version: "0.1.0",
+  }
+	server := mcp.NewServer(impl, nil)
 
 	// Register tools
 	tools.AddToolsToServer(server)
+
+	// Register resources
+	tools.AddResourcesToServer(server)
 
 	// Start server with appropriate transport
 	if *httpAddr != "" {
