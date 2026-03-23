@@ -18,6 +18,7 @@ This project implements a **Model Context Protocol (MCP)** server in Go. It prov
     - `all_tools.go`: Defines the `MCPTool` struct and tool registration logic.
     - `all_resources.go`: Defines the `MCPResource` struct and resource registration logic.
     - `story_app.go`: Example of an MCP App implementation (tool + resource + UI).
+    - `echo.go`: A simple "echo" tool that returns the input message as is.
     - `ui/`: Contains static assets (HTML/JS/CSS) for MCP Apps, embedded into the binary using `go:embed`.
 - `kmcp.yaml`: Configuration for the `kmcp` tool used for building and deploying the server.
 
